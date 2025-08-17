@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Flashcard App</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cae;
+            --accent-color: #ff6b6b;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--dark-color);
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .flashcards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .flashcard {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            min-height: 150px;
+            width: 100%;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .flashcard:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .flashcard-points {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .flashcard-details {
+            color: #666;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .flashcard-back .flashcard-details {
+            color: white;
+        }
+
+        .points-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .toggle-btn, .action-btn {
+            width: auto !important;
+            padding: 0.5rem 1.5rem !important;
+            margin: 0 !important;
+            background-color: var(--accent-color) !important;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn:hover, .action-btn:hover {
+            background-color: #ff5252 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .action-btn.secondary {
+            background-color: #6c757d !important;
+        }
+        
+        .action-btn.secondary:hover {
+            background-color: #5a6268 !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes flipInY {
+            from { transform: perspective(400px) rotateY(90deg); opacity: 0; }
+            to { transform: perspective(400px) rotateY(0deg); opacity: 1; }
+        }
+
+        .flip-in {
+            animation: flipInY 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 CW SEIT Interactive Flashcard App</h1>
+            <div class="header-actions">
+                <button id="preview-cards" class="action-btn secondary" title="Preview flashcards">👁️ Preview Cards</button>
+                <button id="save-cards" class="action-btn secondary" title="Save flashcards to a file">💾 Save Set</button>
+                <button id="load-cards" class="action-btn secondary" title="Load flashcards from a file">📂 Load Set</button>
+                <button id="import-excel" class="action-btn secondary" title="Import from Excel">📊 From Excel</button>
+                <button id="clear-cards" class="action-btn secondary" title="Remove all flashcards">🗑️ Clear Cards</button>
+                <button id="swap-cards" class="action-btn secondary" title="Swap term and definition" style="display: none;">🔄 Swap</button>
+                <input type="file" id="load-file" accept=".json" style="display: none;">
+                <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="display: none;">
+                <button id="toggle-form" class="toggle-btn">+ New Card</button>
+            </div>
+        </div>
+        
+        <div class="controls" id="card-form" style="display: none;">
+            <div class="form-group">
+                <label for="card-term">Term:</label>
+                <input type="text" id="card-term" placeholder="Enter term">
+            </div>
+            <div class="form-group">
+                <label for="card-definition">Definition:</label>
+                <textarea id="card-definition" rows="3" placeholder="Enter definition"></textarea>
+            </div>
+            <button id="add-card">Add Flashcard</button>
+        </div>
+
+        <div class="flashcards-container" id="flashcards">
+            
+        </div>
+        
+       
+        <div id="preview-mode" style="display: none; text-align: center; margin-top: 2rem;">
+            <div id="current-card" style="max-width: 600px; margin: 0 auto 2rem;">
+               
+            </div>
+            <div class="preview-controls" style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;">
+                <button id="prev-card" class="action-btn" style="width: auto; padding: 0.5rem 1.5rem;">⬅️ Previous</button>
+                <button id="next-card" class="action-btn" style="width: auto; padding: 0.5rem 1.5rem;">Next ➡️</button>
+            </div>
+            <div style="margin-top: 1rem; color: #666;">
+                Card <span id="card-position">1</span> of <span id="total-cards">0</span>
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const addButton = document.getElementById('add-card');
+            const termInput = document.getElementById('card-term');
+            const definitionInput = document.getElementById('card-definition');
+            const flashcardsContainer = document.getElementById('flashcards');
+
+            // Load cards from localStorage if available
+            let cards = JSON.parse(localStorage.getItem('flashcards')) || [];
+            
+            // Excel import functionality
+            const importExcelButton = document.getElementById('import-excel');
+            const excelFileInput = document.getElementById('excel-file');
+            
+            importExcelButton.addEventListener('click', () => {
+                excelFileInput.click();
+            });
+            
+            excelFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                       
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: ['term', 'definition'] });
+                        
+                        
+                        const hasHeader = jsonData.length > 0 && 
+                                         'term' in jsonData[0] && 
+                                         'definition' in jsonData[0];
+                        
+                        const importedCards = hasHeader ? jsonData.slice(1) : jsonData;
+                        
+                        
+                        const validCards = importedCards.filter(card => 
+                            card && 
+                            card.term !== undefined && 
+                            card.definition !== undefined &&
+                            String(card.term).trim() !== '' && 
+                            String(card.definition).trim() !== ''
+                        );
+                        
+                        if (validCards.length === 0) {
+                            alert('No valid flashcards found in the Excel file. Please check the format.');
+                            return;
+                        }
+                        
+                        
+                        cards.push(...validCards);
+                        saveCards();
+                        displayCards();
+                        
+                        // Show success message
+                        alert(`Successfully imported ${validCards.length} flashcard(s) from Excel!`);
+                        
+                    } catch (error) {
+                        console.error('Error importing Excel file:', error);
+                        alert('Error importing Excel file. Please make sure the file is in the correct format.');
+                    } finally {
+                        // Reset the input so the same file can be imported again if needed
+                        e.target.value = '';
+                    }
+                };
+                
+                reader.onerror = function() {
+                    alert('Error reading the file. Please try again.');
+                    e.target.value = '';
+                };
+                
+                reader.readAsArrayBuffer(file);
+            });
+            
+            // Display existing cards
+            function displayCards() {
+                flashcardsContainer.innerHTML = '';
+                cards.forEach((card, index) => {
+                    createCardElement(card, index);
+                });
+                
+                // Update total cards count in preview mode if active
+                if (isPreviewMode) {
+                    totalCardsElement.textContent = cards.length;
+                    if (cards.length > 0) {
+                        currentCardIndex = Math.min(currentCardIndex, cards.length - 1);
+                        updatePreviewCard();
+                    }
+                }
+            }
+
+            // Create a new flashcard element
+            function createCardElement(card, index) {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'flashcard flip-in';
+                cardElement.style.animationDelay = `${index * 0.1}s`;
+                
+                cardElement.innerHTML = `
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <div class="flashcard-points">${card.term}</div>
+                            <div class="flashcard-details">Click to flip</div>
+                        </div>
+                        <div class="flashcard-back">
+                            <div class="flashcard-details">${card.definition}</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Ensure the card has the proper class for styling
+                cardElement.classList.add('flashcard');
+
+                // Add click event to flip card
+                cardElement.addEventListener('click', function(e) {
+                    // Don't flip if delete button was clicked
+                    if (e.target.closest('button')) return;
+                    
+                    // Toggle the flipped class on the card
+                    this.classList.toggle('flipped');
+                });
+                
+                // Make sure click on "Click to flip" text also flips the card
+                const clickToFlipText = cardElement.querySelector('.flashcard-details');
+                if (clickToFlipText) {
+                    clickToFlipText.style.cursor = 'pointer';
+                }
+
+                // Add delete button (optional)
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '×';
+                deleteBtn.style.cssText = `
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    background: var(--accent-color);
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 16px;
+                    line-height: 1;
+                    padding: 0;
+                    z-index: 10;
+                `;
+                
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this card?')) {
+                        cards.splice(index, 1);
+                        saveCards();
+                        displayCards();
+                    }
+                });
+
+                cardElement.appendChild(deleteBtn);
+                flashcardsContainer.appendChild(cardElement);
+            }
+
+            // Save cards to localStorage
+            function saveCards() {
+                localStorage.setItem('flashcards', JSON.stringify(cards));
+            }
+
+            // Add new card
+            addButton.addEventListener('click', () => {
+                const term = termInput.value.trim();
+                const definition = definitionInput.value.trim();
+
+                if (term && definition) {
+                    const newCard = { term, definition };
+                    cards.push(newCard);
+                    saveCards();
+                    
+                    // Create and display the new card with animation
+                    createCardElement(newCard, cards.length - 1);
+                    
+                    // Clear inputs
+                    termInput.value = '';
+                    definitionInput.value = '';
+                    termInput.focus();
+                } else {
+                    alert('Please enter both term and definition');
+                }
+            });
+
+            // Allow adding card with Enter key in textarea
+            definitionInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    addButton.click();
+                }
+            });
+
+            // Toggle form visibility and preview mode
+            const toggleForm = document.getElementById('toggle-form');
+            const cardForm = document.getElementById('card-form');
+            const previewMode = document.getElementById('preview-mode');
+            const previewButton = document.getElementById('preview-cards');
+            const currentCardElement = document.getElementById('current-card');
+            const cardPositionElement = document.getElementById('card-position');
+            const totalCardsElement = document.getElementById('total-cards');
+            let currentCardIndex = 0;
+            let isPreviewMode = false;
+            
+            // Toggle new card form
+            toggleForm.addEventListener('click', () => {
+                if (isPreviewMode) return; // Don't toggle form in preview mode
+                const isVisible = cardForm.style.display === 'block';
+                cardForm.style.display = isVisible ? 'none' : 'block';
+                toggleForm.textContent = isVisible ? '+ New Card' : 'Cancel';
+                toggleForm.style.backgroundColor = isVisible ? 'var(--accent-color)' : '#6c757d';
+            });
+            
+            // Toggle preview mode
+            previewButton.addEventListener('click', () => {
+                isPreviewMode = !isPreviewMode;
+                
+                if (isPreviewMode) {
+                    // Entering preview mode
+                    if (cards.length === 0) {
+                        alert('No cards to preview! Please add some cards first.');
+                        isPreviewMode = false;
+                        return;
+                    }
+                    
+                    // Hide regular view, show preview and swap button
+                    flashcardsContainer.style.display = 'none';
+                    cardForm.style.display = 'none';
+                    previewMode.style.display = 'block';
+                    document.getElementById('swap-cards').style.display = 'inline-block';
+                    previewButton.textContent = 'Exit Preview';
+                    previewButton.style.backgroundColor = '#6c757d';
+                    
+                    // Initialize preview
+                    currentCardIndex = 0;
+                    updatePreviewCard();
+                } else {
+                    // Exiting preview mode
+                    flashcardsContainer.style.display = 'grid';
+                    previewMode.style.display = 'none';
+                    document.getElementById('swap-cards').style.display = 'none';
+                    previewButton.textContent = '👁️ Preview Cards';
+                    previewButton.style.backgroundColor = 'var(--accent-color)';
+                }
+            });
+            
+            // Navigation functions
+            document.getElementById('next-card').addEventListener('click', showNextCard);
+            document.getElementById('prev-card').addEventListener('click', showPrevCard);
+            
+            // Toggle between term/definition first
+            let showTermFirst = true;
+            document.getElementById('swap-cards').addEventListener('click', () => {
+                showTermFirst = !showTermFirst;
+                updatePreviewCard();
+            });
+            
+            function showNextCard() {
+                if (cards.length === 0) return;
+                currentCardIndex = (currentCardIndex + 1) % cards.length;
+                updatePreviewCard();
+            }
+            
+            function showPrevCard() {
+                if (cards.length === 0) return;
+                currentCardIndex = (currentCardIndex - 1 + cards.length) % cards.length;
+                updatePreviewCard();
+            }
+            
+            function updatePreviewCard() {
+                if (cards.length === 0) return;
+                
+                const card = cards[currentCardIndex];
+                const frontContent = showTermFirst ? 
+                    `<div class="flashcard-points" style="font-size: 1.5rem; margin-bottom: 1rem;">${card.term}</div>
+                     <div class="flashcard-details">Click to flip</div>` :
+                    `<div class="flashcard-details" style="font-size: 1.5rem; margin-bottom: 1rem;">${card.definition}</div>
+                     <div class="flashcard-details">Click to flip</div>`;
+                     
+                const backContent = showTermFirst ? 
+                    `<div class="flashcard-details" style="font-size: 1.2rem; line-height: 1.6;">${card.definition}</div>` :
+                    `<div class="flashcard-details" style="font-size: 1.2rem; line-height: 1.6;">${card.term}</div>`;
+                
+                currentCardElement.innerHTML = `
+                    <div class="flashcard" style="width: 100%; height: 300px; margin: 0 auto; cursor: pointer;">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                                ${frontContent}
+                            </div>
+                            <div class="flashcard-back" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                                ${backContent}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click to flip functionality
+                const previewCard = currentCardElement.querySelector('.flashcard');
+                previewCard.addEventListener('click', function() {
+                    this.classList.toggle('flipped');
+                });
+                
+                // Update position indicator
+                cardPositionElement.textContent = currentCardIndex + 1;
+                totalCardsElement.textContent = cards.length;
+            }
+
+            // Clear all cards
+            document.getElementById('clear-cards').addEventListener('click', () => {
+                if (cards.length === 0) {
+                    alert('No flashcards to clear!');
+                    return;
+                }
+                
+                if (confirm('Are you sure you want to remove all flashcards? This action cannot be undone.')) {
+                    cards = [];
+                    saveCards();
+                    displayCards();
+                    alert('All flashcards have been removed.');
+                }
+            });
+            
+            // Save cards to file
+            document.getElementById('save-cards').addEventListener('click', () => {
+                if (cards.length === 0) {
+                    alert('No flashcards to save!');
+                    return;
+                }
+                
+                const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(cards, null, 2));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute('href', dataStr);
+                downloadAnchor.setAttribute('download', `flashcards_${new Date().toISOString().split('T')[0]}.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                document.body.removeChild(downloadAnchor);
+            });
+            
+            // Load cards from file
+            document.getElementById('load-cards').addEventListener('click', () => {
+                if (cards.length > 0 && !confirm('This will replace your current flashcards. Continue?')) {
+                    return;
+                }
+                document.getElementById('load-file').click();
+            });
+            
+            document.getElementById('load-file').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const loadedCards = JSON.parse(event.target.result);
+                        if (Array.isArray(loadedCards) && loadedCards.every(card => card.points && card.details)) {
+                            cards = loadedCards;
+                            saveCards();
+                            displayCards();
+                        } else {
+                            throw new Error('Invalid flashcard format');
+                        }
+                    } catch (error) {
+                        alert('Error loading flashcards: Invalid file format');
+                        console.error('Error loading flashcards:', error);
+                    }
+                };
+                reader.onerror = () => {
+                    alert('Error reading file');
+                };
+                reader.readAsText(file);
+                // Reset the input so the same file can be loaded again if needed
+                e.target.value = '';
+            });
+            
+            // Initial display of cards
+            displayCards();
+        });
+    </script>
+</body>
+</html>
