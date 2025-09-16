@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>CW SEIT Interactive Flashcard App</title>
+    <title>Flashcard Study App</title>
     <meta name="theme-color" content="#4a6fa5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Flashcard Study">
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmxhc2hjYXJkIFN0dWR5IEFwcCIsInNob3J0X25hbWUiOiJTdHVkeSBDYXJkcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjVmN2ZhIiwidGhlbWVfY29sb3IiOiIjNGE2NmFhIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL3BpY3N1bS5waG90b3MvMTkyLzE5MiIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifSx7InNyYyI6Imh0dHBzOi8vcGljc3VtLnBob3Rvcy81MTIvNTEyIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
-    <link rel="apple-touch-icon" href="https://picsum.photos/192/192">
+    
+    <!-- Custom Flashcard App Icon -->
+    <link rel="icon" href="images/icon-192x192.png" type="image/png">
+    <link rel="apple-touch-icon" href="images/icon-192x192.png">
+    
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRmxhc2hjYXJkIFN0dWR5IEFwcCIsInNob3J0X25hbWUiOiJTdHVkeSBDYXJkcyIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjVmN2ZhIiwidGhlbWVfY29sb3IiOiIjNGE2NmFhIiwib3JpZW50YXRpb24iOiJwb3J0cmFpdCIsImljb25zIjpbeyJzcmMiOiJpbWFnZXMvaWNvbi0xOTJ4MTkyLnBuZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifSx7InNyYyI6ImltYWdlcy9pY29uLTUxMng1MTIucG5nIiwic2l6ZXMiOiI1MTJ4NTEyIiwidHlwZSI6ImltYWdlL3BuZyJ9XX0=">
     <style>
         :root {
             --primary-color: #4a6fa5;
@@ -77,6 +81,15 @@
             font-size: 1.5rem;
             font-weight: 600;
             color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .app-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
         }
         
         .close-sidebar {
@@ -639,7 +652,10 @@
         <!-- Sidebar -->
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-title">📚 Flashcards</div>
+                <div class="sidebar-title">
+                    <img src="images/icon-192x192.png" alt="App Icon" class="app-icon">
+                    📚 Flashcards
+                </div>
                 <button class="close-sidebar" id="close-sidebar">×</button>
             </div>
             <div class="sidebar-content">
@@ -844,6 +860,8 @@
                     const CACHE_NAME = 'flashcards-app-v1';
                     const urlsToCache = [
                         '/',
+                        'images/icon-192x192.png',
+                        'images/icon-512x512.png',
                         'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
                     ];
 
