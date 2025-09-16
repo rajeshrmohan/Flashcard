@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Flashcard Study App</title>
+    <title>CW SEIT Interactive Flashcard App</title>
     <meta name="theme-color" content="#4a6fa5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -556,6 +556,35 @@
                 padding: 0.5rem 1rem !important;
                 font-size: 0.9rem;
             }
+            
+            /* Center the preview card on mobile */
+            #preview-mode {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: calc(100vh - 120px);
+                padding: 1rem 0;
+            }
+            
+            #current-card {
+                width: 100%;
+                max-width: 350px;
+            }
+        }
+        
+        /* Desktop preview mode */
+        @media (min-width: 769px) {
+            #preview-mode {
+                display: block;
+                text-align: center;
+                padding: 2rem 0;
+            }
+            
+            #current-card {
+                max-width: 600px;
+                margin: 0 auto;
+            }
         }
         
         /* Toast notification */
@@ -639,7 +668,6 @@
                     <div class="image-upload-container">
                         <label>Add Image (Optional):</label>
                         <div class="image-upload-buttons">
-                            <button type="button" id="camera-btn" class="image-upload-btn">📷 Camera</button>
                             <button type="button" id="gallery-btn" class="image-upload-btn">🖼️ Gallery</button>
                         </div>
                         <div class="image-preview-container" id="image-preview-container">
@@ -648,7 +676,6 @@
                         </div>
                     </div>
                     
-                    <input type="file" id="camera-input" accept="image/*" capture="camera" class="hidden-input">
                     <input type="file" id="gallery-input" accept="image/*" class="hidden-input">
                     
                     <button id="add-card">Add Flashcard</button>
@@ -673,7 +700,7 @@
             </div>
             
             <div id="preview-mode" style="display: none;">
-                <div id="current-card" style="max-width: 600px; margin: 0 auto;">
+                <div id="current-card">
                     <!-- Preview card will be dynamically added here -->
                 </div>
                 <div class="progress-container">
@@ -729,9 +756,7 @@
             const installButton = document.getElementById('install-button');
             
             // Image upload elements
-            const cameraBtn = document.getElementById('camera-btn');
             const galleryBtn = document.getElementById('gallery-btn');
-            const cameraInput = document.getElementById('camera-input');
             const galleryInput = document.getElementById('gallery-input');
             const imagePreviewContainer = document.getElementById('image-preview-container');
             const imagePreview = document.getElementById('image-preview');
@@ -852,15 +877,10 @@
             }
             
             // Image upload functionality
-            cameraBtn.addEventListener('click', () => {
-                cameraInput.click();
-            });
-            
             galleryBtn.addEventListener('click', () => {
                 galleryInput.click();
             });
             
-            cameraInput.addEventListener('change', handleImageUpload);
             galleryInput.addEventListener('change', handleImageUpload);
             
             function handleImageUpload(e) {
@@ -1047,7 +1067,7 @@
                     
                     // Hide regular view, show preview
                     flashcardsContainer.style.display = 'none';
-                    previewMode.style.display = 'block';
+                    previewMode.style.display = window.innerWidth <= 768 ? 'flex' : 'block';
                     swapCardsBtn.style.display = 'inline-block';
                     previewBtn.textContent = 'Exit Preview';
                     previewBtn.style.backgroundColor = '#6c757d';
@@ -1303,6 +1323,11 @@
             window.addEventListener('resize', () => {
                 if (window.innerWidth > 768) {
                     overlay.classList.remove('active');
+                }
+                
+                // Update preview mode display on resize
+                if (isPreviewMode) {
+                    previewMode.style.display = window.innerWidth <= 768 ? 'flex' : 'block';
                 }
             });
         });
